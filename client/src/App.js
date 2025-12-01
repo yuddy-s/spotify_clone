@@ -5,12 +5,13 @@ import { AuthContextProvider } from './auth';
 import { GlobalStoreContextProvider } from './store'
 import {
     AppBanner,
-    HomeWrapper,
+    HomeScreen,
     LoginScreen,
     RegisterScreen,
     Statusbar,
     WorkspaceScreen
 } from './components'
+import WelcomeScreen from './components/WelcomeScreen.jsx';
 /*
   This is the entry-point for our application. Notice that we
   inject our store into all the components in our application.
@@ -24,7 +25,9 @@ const App = () => {
                 <GlobalStoreContextProvider>              
                     <AppBanner />
                     <Switch>
-                        <Route path="/" exact component={HomeWrapper} />
+                        {/* <Route path="/" exact component={WelcomeScreen}/> */}
+                        <Route path="/" exact component={WelcomeScreen} />
+                        <Route path="/home" exact component={HomeScreen} />
                         <Route path="/login/" exact component={LoginScreen} />
                         <Route path="/register/" exact component={RegisterScreen} />
                         <Route path="/playlist/:id" exact component={WorkspaceScreen} />

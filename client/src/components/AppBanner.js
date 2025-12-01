@@ -97,15 +97,30 @@ export default function AppBanner() {
 
     return (
         <Box sx={{flexGrow: 1}}>
-            <AppBar position="static">
+            <AppBar position="static"
+                sx={{
+                    background: 'linear-gradient(90deg, #163C90, #2764F3)'
+                }}
+            >
                 <Toolbar>
-                    <Typography                        
+                    <Typography
                         variant="h4"
                         noWrap
                         component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}                        
+                        sx={{ display: { xs: 'none', sm: 'block' } }}
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                        <IconButton
+                            onClick={handleHouseClick}
+                            component={Link}
+                            to="/"
+                            size="large"
+                            sx={{
+                            color: "white",
+                            "&:hover":{ backgroundColor:"rgba(255, 255, 255, 0.21)" }
+                            }}
+                        >
+                            ⌂
+                        </IconButton>
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>

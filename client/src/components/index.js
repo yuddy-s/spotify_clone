@@ -1,7 +1,7 @@
 import AppBanner from './AppBanner'
 import EditToolbar from './EditToolbar'
+import WelcomeScreen from './WelcomeScreen.jsx'
 import HomeScreen from './HomeScreen'
-import HomeWrapper from './HomeWrapper'
 import ListCard from './PlaylistCard'
 import LoginScreen from './LoginScreen'
 import MUIDeleteModal from './MUIDeleteModal'
@@ -23,7 +23,7 @@ export {
     AppBanner,  
     EditToolbar, 
     HomeScreen,
-    HomeWrapper,
+    WelcomeScreen,
     ListCard, 
     LoginScreen,
     MUIDeleteModal,
