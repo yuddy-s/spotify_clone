@@ -1,0 +1,591 @@
+{
+    "users": [
+        {
+            "firstName": "Joe",
+            "lastName": "Shmo",
+            "email": "joe@shmo.com",
+            "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
+            "playlists": []
+        },
+        {
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
+            "playlists": []
+        },
+        {
+            "firstName": "Shihab",
+            "lastName": "Jamal",
+            "email": "shihab@jamal.com",
+            "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
+            "playlists": []
+        }
+    ],
+    "playlists": [
+        {
+            "ownerEmail": "joe@shmo.com",
+            "name": "Spacey",
+            "songs": [
+                {
+                    "title": "Across the Universe",
+                    "artist": "The Beatles",
+                    "year": 1969,
+                    "youTubeId": "90M60PzmxEE"
+                },
+                {
+                    "title": "Astronomy Domine",
+                    "artist": "Pink Floyd",
+                    "year": 1967,
+                    "youTubeId": "8UbNbor3OqQ"
+                },
+                {
+                    "title": "Black Hole Sun",
+                    "artist": "Soundgarden",
+                    "year": 1994,
+                    "youTubeId": "3mbBbFH9fAg"
+                },
+                {
+                    "title": "Brain Damage/Eclipse",
+                    "artist": "Pink Floyd",
+                    "year": 1973,
+                    "youTubeId": "g1OOQP1-wOE"
+                },
+                {
+                    "title": "Fly Me to the Moon",
+                    "artist": "Frank Sinatra",
+                    "year": 1964,
+                    "youTubeId": "ZEcqHA7dbwM"
+                },
+                {
+                    "title": "In the Meantime",
+                    "artist": "Spacehog",
+                    "year": 1994,
+                    "youTubeId": "PCsGRCf8T9Y"
+                },
+                {
+                    "title": "Major Tom",
+                    "artist": "Peter Shilling",
+                    "year": 1982,
+                    "youTubeId": "wO0A0XcWy88"
+                },
+                {
+                    "title": "Man on the Moon",
+                    "artist": "REM",
+                    "year": 1992,
+                    "youTubeId": "dLxpNiF0YKs"
+                },
+                {
+                    "title": "Rocket Man",
+                    "artist": "Elton John",
+                    "year": 1972,
+                    "youTubeId": "DtVBCG6ThDk"
+                },
+                {
+                    "title": "Set the Controls for the Heart of the Sun",
+                    "artist": "Pink Floyd",
+                    "year": 1968,
+                    "youTubeId": "qupVCTn5Dko"
+                },
+                {
+                    "title": "Space Oddity",
+                    "artist": "David Bowie",
+                    "year": 1969,
+                    "youTubeId": "iYYRH4apXDo"
+                },
+                {
+                    "title": "Space Song",
+                    "artist": "Beach House",
+                    "year": 2015,
+                    "youTubeId": "RBtlPT23PTM"
+                },
+                {
+                    "title": "Starless",
+                    "artist": "King Crimson",
+                    "year": 1974,
+                    "youTubeId": "OfR6_V91fG8"
+                },
+                {
+                    "title": "Starman",
+                    "artist": "David Bowie",
+                    "year": 1972,
+                    "youTubeId": "t365MuktYQs"
+                },
+                {
+                    "title": "Starship Trooper",
+                    "artist": "Yes",
+                    "year": 1971,
+                    "youTubeId": "xk4U8BembHM"
+                }
+            ]
+        },
+        {
+            "ownerEmail": "joe@shmo.com",
+            "name": "Any Colour You Like",
+            "songs": [
+                {
+                    "title": "99 Red Balloons",
+                    "artist": "Nena",
+                    "year": 1984,
+                    "youTubeId": "Fpu5a0Bl8eY"
+                },
+                {
+                    "title": "Big Blue Sun",
+                    "artist": "Adrian Belew",
+                    "year": 1986,
+                    "youTubeId": "DMkEmW2awQw"
+                },
+                {
+                    "title": "Black Dog",
+                    "artist": "Led Zeppelin",
+                    "year": 1971,
+                    "youTubeId": "2KPEHohJMuw"
+                },
+                {
+                    "title": "Golden Brown",
+                    "artist": "The Stranglers",
+                    "year": 1981,
+                    "youTubeId": "7KIHvuMl4Kk"
+                },
+                {
+                    "title": "Goodbye Yellow Brick Road",
+                    "artist": "Elton John",
+                    "year": 1973,
+                    "youTubeId": "wy709iNG6i8"
+                },
+                {
+                    "title": "Green is the Colour",
+                    "artist": "Pink Floyd",
+                    "year": 1969,
+                    "youTubeId": "4XeWngFZaa8"
+                },
+                {
+                    "title": "In the Court of the Crimson King",
+                    "artist": "King Crimson",
+                    "year": 1969,
+                    "youTubeId": "ukgraQ-xkp4"
+                },
+                {
+                    "title": "Orange Crush",
+                    "artist": "REM",
+                    "year": 1988,
+                    "youTubeId": "_mSmOcmk7uQ"
+                },
+                {
+                    "title": "Pink Houses",
+                    "artist": "John Mellancamp",
+                    "year": 1983,
+                    "youTubeId": "qOfkpu6749w"
+                },
+                {
+                    "title": "Purple Rain",
+                    "artist": "Prince",
+                    "year": 1984,
+                    "youTubeId": "TvnYmWpD_T8"
+                },
+                {
+                    "title": "White Lines",
+                    "artist": "Grandmaster Flash and the Furious Five",
+                    "year": 1983,
+                    "youTubeId": "DwRXI-y6M9o"
+                }
+            ]
+        },
+        {
+            "ownerEmail": "jane@doe.com",
+            "name": "Don't be Rude",
+            "songs": [
+                {
+                    "title": "A Message to You Rudy",
+                    "artist": "The Specials",
+                    "year": 1979,
+                    "youTubeId": "cntvEDbagAw"
+                },
+                {
+                    "title": "Rudie Can't Fail",
+                    "artist": "The Clash",
+                    "year": 1979,
+                    "youTubeId": "uEK9oK02D1M"
+                }
+            ]
+        },
+        {
+            "ownerEmail": "shihab@jamal.com",
+            "name": "Old Songs I Like",
+            "songs": [
+                    { 
+                        "title": "Bohemian Rhapsody", 
+                        "artist": "Queen", 
+                        "year": 1975, 
+                        "youTubeId": "fJ9rUzIMcZQ"
+                    },
+                    { 
+                        "title": "Imagine", 
+                        "artist": "John Lennon", 
+                        "year": 1971, 
+                        "youTubeId": "YkgkThdzX-8" 
+                    },
+                    { 
+                        "title": "What's Going On", 
+                        "artist": "Marvin Gaye", 
+                        "year": 1971, 
+                        "youTubeId": "H-kA3UtBj4M" 
+                    },
+                    { 
+                        "title": "Hotel California", 
+                        "artist": "Eagles", 
+                        "year": 1976, 
+                        "youTubeId": "EqPtz5qN7HM" 
+                    },
+                    { 
+                        "title": "Superstition", 
+                        "artist": "Stevie Wonder", 
+                        "year": 1972, 
+                        "youTubeId": "0CFuCYNx-1g" 
+                    },
+                    { 
+                        "title": "Let It Be", 
+                        "artist": "The Beatles", 
+                        "year": 1970, 
+                        "youTubeId": "QDYfEBY9NM4" 
+                    },
+                    { 
+                        "title": "Respect", 
+                        "artist": "Aretha Franklin", 
+                        "year": 1967, 
+                        "youTubeId": "6FOUqQt3Kg0" 
+                    },
+                    { 
+                        "title": "I Heard It Through the Grapevine", 
+                        "artist": "Marvin Gaye", 
+                        "year": 1968, 
+                        "youTubeId": "HzZ_urpj4As" 
+                    },
+                    { 
+                        "title": "Stand By Me", 
+                        "artist": "Ben E. King", 
+                        "year": 1961, 
+                        "youTubeId": "hwZNL7QVJjE" 
+                    },
+                    { 
+                        "title": "My Girl", 
+                        "artist": "The Temptations", 
+                        "year": 1964, 
+                        "youTubeId": "6IUG-9jZD-g" 
+                    },
+                    { 
+                        "title": "Ain't No Mountain High Enough", 
+                        "artist": "Marvin Gaye & Tammi Terrell", 
+                        "year": 1967, 
+                        "youTubeId": "JqW4ZQx2kZ0" 
+                    },
+                    { 
+                        "title": "What'd I Say", 
+                        "artist": "Ray Charles", 
+                        "year": 1959, 
+                        "youTubeId": "Z4j3y8wz6gA" 
+                    },
+                    { 
+                        "title": "Johnny B. Goode", 
+                        "artist": "Chuck Berry", 
+                        "year": 1958, 
+                        "youTubeId": "ZFo8-JqzSCM" 
+                    },
+                    { 
+                        "title": "Blueberry Hill", 
+                        "artist": "Fats Domino", 
+                        "year": 1956, 
+                        "youTubeId": "zD8v3c8Q2hM" 
+                    },
+                    {
+                        "title": "Rock Around the Clock",
+                        "artist": "Bill Haley & His Comets",
+                        "year": 1954,
+                        "youTubeId": "ZgdufzXvjqw"
+                    },
+                    {
+                        "title": "La Bamba",
+                        "artist": "Ritchie Valens",
+                        "year": 1958,
+                        "youTubeId": "Jp6j5HJ-Cok"
+                    },
+                    {
+                        "title": "Tutti Frutti",
+                        "artist": "Little Richard",
+                        "year": 1955,
+                        "youTubeId": "tZt1yqz6c6I"
+                    },
+                    {
+                        "title": "Hound Dog",
+                        "artist": "Elvis Presley",
+                        "year": 1956,
+                        "youTubeId": "Yw5bF6J6fQ0"
+                    },
+                    {
+                        "title": "Jailhouse Rock",
+                        "artist": "Elvis Presley",
+                        "year": 1957,
+                        "youTubeId": "g1d6X4n6g2g"
+                    },
+                    {
+                        "title": "Great Balls of Fire",
+                        "artist": "Jerry Lee Lewis",
+                        "year": 1957,
+                        "youTubeId": "eFjjO_lHF9c"
+                    }
+            ]
+        },
+        {
+            "ownerEmail": "shihab@jamal.com",
+            "name": "My Favorite Songs",
+            "songs": [
+                {
+                    "title": "Change",
+                    "artist": "J. Cole",
+                    "year": 2016,
+                    "youTubeId": "AiZuT69qJLc"
+                },
+                {
+                    "title": "Sideline Story",
+                    "artist": "J. Cole",
+                    "year": 2011,
+                    "youTubeId": "_h82Y-9GMJ8"
+                },
+                {
+                    "title": "Lightyears",
+                    "artist": "Juice WRLD",
+                    "year": 2024,
+                    "youTubeId": "gBKQOAUjI8w"
+                },
+                {
+                    "title": "Gnoster OST",
+                    "artist": "Tai Tomisawa",
+                    "year": 2025,
+                    "youTubeId": "vJ7XlyghzW8"
+                },
+                {
+                    "title": "Caligo OST",
+                    "artist": "Soma Tanazaki",
+                    "year": 2025,
+                    "youTubeId": "o0yz457hVec"
+                },
+                {
+                    "title": "Venus",
+                    "artist": "DC the Don",
+                    "year": 2022,
+                    "youTubeId": "qPvHGbrmqT4"
+                },
+                {
+                    "title": "Suge",
+                    "artist": "DaBaby",
+                    "year": 2019,
+                    "youTubeId": "dxRRtTCCgwc"
+                },
+                {
+                    "title": "The Way Life Goes",
+                    "artist": "Lil Uzi Vert",
+                    "year": 2017,
+                    "youTubeId": "WF34Nwv0K5s"
+                },
+                {
+                    "title": "Do What I Want",
+                    "artist": "Lil Uzi Vert",
+                    "year": 2016,
+                    "youTubeId": "9G-7P6-FLLM"
+                },
+                {
+                    "title": "Fast",
+                    "artist": "Juice WRLD",
+                    "year": 2018,
+                    "youTubeId": "BO18LZkhiEc"
+                },
+                {
+                    "title": "Runaway",
+                    "artist": "J. Cole",
+                    "year": 2011,
+                    "youTubeId": "qvgO9Gp_rTE"
+                },
+                {
+                    "title": "No Role Modelz",
+                    "artist": "J. Cole",
+                    "year": 2014,
+                    "youTubeId": "yw8LmdRE7Os"
+                },
+                {
+                    "title": "Lucid Dreams",
+                    "artist": "Juice WRLD",
+                    "year": 2018,
+                    "youTubeId": "mWWZk67U6bM"
+                },
+                {
+                    "title": "Neighbours",
+                    "artist": "J. Cole",
+                    "year": 2016,
+                    "youTubeId": "b5XxJnhzQw4"
+                },
+                {
+                    "title": "Lean Wit Me",
+                    "artist": "Juice WRLD",
+                    "year": 2018,
+                    "youTubeId": "ZM9M51FlKaY"
+                },
+                {
+                    "title": "A Lot",
+                    "artist": "21 Savage",
+                    "year": 2018,
+                    "youTubeId": "L4yLWd4oOJM"
+                },
+                {
+                    "title": "Goosebumps",
+                    "artist": "Travis Scott",
+                    "year": 2016,
+                    "youTubeId": "SkRSXFQerq8"
+                },
+                {
+                    "title": "Demons and Angels",
+                    "artist": "A Boogie Wit Da Hoodie",
+                    "year": 2019,
+                    "youTubeId": "cTXXiwRA8Ls"
+                },
+                {
+                    "title": "COMË N GO",
+                    "artist": "Yeat",
+                    "year": 2025,
+                    "youTubeId": "7ccyYIfoRPg"
+                },
+                {
+                    "title": "Lust",
+                    "artist": "Lil Skies",
+                    "year": 2018,
+                    "youTubeId": "VMG00VnyDdo"
+                }
+            ]
+        },
+        {
+            "ownerEmail": "shihab@jamal.com",
+            "name": "Songs I Find Interesting or Unusual",
+            "songs": [
+                {
+                    "title": "The Less I Know The Better",
+                    "artist": "Tame Impala",
+                    "year": 2015,
+                    "youTubeId": "2SUwOgmvzK4"
+                },
+                {
+                    "title": "Let It Happen",
+                    "artist": "Tame Impala",
+                    "year": 2015,
+                    "youTubeId": "pFptt7Cargc"
+                },
+                {
+                    "title": "Lost in Yesterday",
+                    "artist": "Tame Impala",
+                    "year": 2020,
+                    "youTubeId": "utCjuKDXQsE"
+                },
+                {
+                    "title": "Borderline",
+                    "artist": "Tame Impala",
+                    "year": 2020,
+                    "youTubeId": "2g5xkLqIElU"
+                },
+                {
+                    "title": "Feels Like We Only Go Backwards",
+                    "artist": "Tame Impala",
+                    "year": 2012,
+                    "youTubeId": "wycjnCCgUes"
+                },
+                {
+                    "title": "End Of Summer",
+                    "artist": "Tame Impala",
+                    "year": 2025,
+                    "youTubeId": "ulkdUfItyxI"
+                },
+                {
+                    "title": "Is It True",
+                    "artist": "Tame Impala",
+                    "year": 2020,
+                    "youTubeId": "KN8nJFLu1Rk"
+                },
+                {
+                    "title": "a lantern to a montague",
+                    "artist": "Eric Doa",
+                    "year": 2024,
+                    "youTubeId": "Y5vn-pFqVaw"
+                },
+                {
+                    "title": "Sundress",
+                    "artist": "A$AP Rocky",
+                    "year": 2018,
+                    "youTubeId": "xre-oQn1DhY"
+                },
+                {
+                    "title": "Frontier Psychiatrist",
+                    "artist": "The Avalanches",
+                    "year": 2000,
+                    "youTubeId": "9Ab6nPFHN8k"
+                },
+                {
+                    "title": "Strange Overtones",
+                    "artist": "David Byrne & Brian Eno",
+                    "year": 2008,
+                    "youTubeId": "N_zU84vFlgE"
+                },
+                {
+                    "title": "Whirring",
+                    "artist": "The Joy Formidable",
+                    "year": 2009,
+                    "youTubeId": "Z74_Bi3Ib-8"
+                },
+                {
+                    "title": "Breezeblocks",
+                    "artist": "Alt-J",
+                    "year": 2012,
+                    "youTubeId": "qf4yK1v2v6E"
+                },
+                {
+                    "title": "Alaska",
+                    "artist": "Maggie Rogers",
+                    "year": 2017,
+                    "youTubeId": "LVqIhRp6TWc"
+                },
+                {
+                    "title": "Home",
+                    "artist": "Edward Sharpe & The Magnetic Zeros",
+                    "year": 2009,
+                    "youTubeId": "qekse3NBdNE"
+                },
+                {
+                    "title": "Space Song",
+                    "artist": "Beach House",
+                    "year": 2015,
+                    "youTubeId": "FYk6uvicBXk"
+                },
+                {
+                    "title": "Roads",
+                    "artist": "Portishead",
+                    "year": 1994,
+                    "youTubeId": "Roads_VIDEO_ID"
+                },
+                {
+                    "title": "New Person, Same Old Mistakes",
+                    "artist": "Tame Impala",
+                    "year": 2015,
+                    "youTubeId": "qM0zINtulhM"
+                },
+                {
+                    "title": "movinglikeazombie",
+                    "artist": "ericdoa",
+                    "year": 2020,
+                    "youTubeId": "sCUJqR5z_YQ"
+                },
+                {
+                    "title": "Pumped Up Kicks",
+                    "artist": "Foster The People",
+                    "year": 2010,
+                    "youTubeId": "SDTZ7iX4vTQ"
+                }
+            ]
+        }
+    ]
+}
