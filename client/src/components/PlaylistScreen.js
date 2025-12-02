@@ -3,6 +3,9 @@ import { GlobalStoreContext } from '../store';
 import PlaylistCard from './PlaylistCard';
 import MUIDeleteModal from './MUIDeleteModal';
 
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import SearchIcon from '@mui/icons-material/Search';
+
 const HomeScreen = () => {
     const { store } = useContext(GlobalStoreContext);
 
@@ -76,13 +79,20 @@ const HomeScreen = () => {
                     style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
                 />
                 <div style={{ marginTop: '20px' }}>
-                    <button onClick={handleSearch} style={{ padding: '10px 20px', marginRight: '10px' }}>Search</button>
+                    <button onClick={handleSearch} 
+                        style={{ 
+                            padding: '10px 20px', 
+                            marginRight: '10px' 
+                        }}>
+                            <SearchIcon />
+                            Search
+                    </button>
                     
                     <button 
                         onClick={handleClear}  
                         style={{  
                             position: "relative",
-                            left: "25vw",         
+                            left: "20vw",         
                             padding: "10px 14px",
                             backgroundColor: "#ff4d4d",
                             color: "white",
@@ -107,11 +117,44 @@ const HomeScreen = () => {
                 top: 140
             }} />
 
-            <div style={{ width: '65%', padding: '20px', overflowY: 'auto' }}>
-                {store.idNamePairs.map(pair => (
-                    <PlaylistCard key={pair._id} idNamePair={pair} selected={false} />
-                ))}
+            <div style={{ 
+                height: '50vh', 
+                width: '40%', 
+                padding: '20px', 
+                marginLeft: '8vw', 
+                marginTop: '3vh',
+                marginBottom: '2vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: "space-between"
+            }}>
+                
+                <div style={{ height: '100%', overflowY: 'auto', }}>
+                    {store.idNamePairs.map(pair => (
+                        <PlaylistCard key={pair._id} idNamePair={pair} selected={false} />
+                    ))}
+                </div>
                 <MUIDeleteModal />
+
+                <button 
+                    onClick={handleClear}  
+                    style={{          
+                        padding: "10px 14px",
+                        backgroundColor: "#6750A4",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        marginTop: "1vh",  
+                        alignSelf: "flex-start", 
+                        transition: "ease 0.25s",
+                        cursor: "pointer"
+                    }}
+                    onMouseEnter={(e) => (e.target.style.backgroundColor = "#403266ff")}
+                    onMouseLeave={(e) => (e.target.style.backgroundColor = "#6750A4")}
+                >  
+                    <AddBoxIcon fontSize='3px'/>
+                    &nbsp; New Playlist
+                </button>
             </div>
         </div>
     );

@@ -70,25 +70,81 @@ function PlaylistCard(props) {
             id={idNamePair._id}
             key={idNamePair._id}
             sx={{borderRadius:"25px", p: "10px", bgcolor: '#8000F00F', marginTop: '15px', display: 'flex', /*p: 1*/ }}
-            style={{transform:"translate(1%,0%)", width: '98%', fontSize: '48pt' }}
+            style={{transform:"translate(1%,0%)", width: '98%', fontSize: '13pt' }}
             button
             onClick={(event) => {
                 handleLoadList(event, idNamePair._id)
             }}
         >
-            <Box sx={{ p: 1, flexGrow: 1 }}>{idNamePair.name}</Box>
-            <Box sx={{ p: 1 }}>
-                <IconButton onClick={handleToggleEdit} aria-label='edit'>
-                    <EditIcon style={{fontSize:'48pt'}} />
-                </IconButton>
-            </Box>
-            <Box sx={{ p: 1 }}>
-                <IconButton onClick={(event) => {
-                        handleDeleteList(event, idNamePair._id)
-                    }} aria-label='delete'>
-                    <DeleteIcon style={{fontSize:'48pt'}} />
-                </IconButton>
-            </Box>
+            <Box sx={{ p: 1, flexGrow: 1 }}>{idNamePair.name}</Box> 
+            <button 
+                style={{ 
+                    backgroundColor: "#D2292F", 
+                    color: "white", 
+                    padding: '10px 10px', 
+                    borderRadius: "10px", 
+                    marginLeft: "20px",
+                    border: '1px solid black',
+                    transition: "ease 0.25s" 
+                }}
+                onClick={(event) => {
+                    handleDeleteList(event, idNamePair._id)
+                }}
+                onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                onMouseLeave={(e) => {e.target.style.backgroundColor = "#D2292F"; e.target.style.color = "#fff"}}
+            >
+                Delete
+            </button>
+            
+            <button 
+                style={{ 
+                    backgroundColor: "#3A64C4", 
+                    color: "white", 
+                    padding: '10px 10px', 
+                    borderRadius: "10px", 
+                    marginLeft: "10px",
+                    border: '1px solid black',
+                    transition: "ease 0.25s" 
+                }}
+                onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                onMouseLeave={(e) => {e.target.style.backgroundColor = "#3A64C4"; e.target.style.color = "#fff"}}
+                onClick={handleToggleEdit}
+            >
+                Edit
+            </button>
+
+            <button 
+                style={{ 
+                    backgroundColor: "#077836", 
+                    color: "white", 
+                    padding: '10px 10px', 
+                    borderRadius: "10px", 
+                    marginLeft: "10px",
+                    border: '1px solid black',
+                    transition: "ease 0.25s" 
+                }}
+                onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                onMouseLeave={(e) => {e.target.style.backgroundColor = "#077836"; e.target.style.color = "#fff"}}
+            >
+                Copy
+            </button>
+    
+            <button 
+                style={{ 
+                    backgroundColor: "#DE24BC", 
+                    color: "white", 
+                    padding: '10px 10px', 
+                    borderRadius: "10px", 
+                    marginLeft: "10px",
+                    border: '1px solid black',
+                    transition: "ease 0.25s" 
+                }}
+                onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                onMouseLeave={(e) => {e.target.style.backgroundColor = "#DE24BC"; e.target.style.color = "#fff"}}
+            >
+                Play
+            </button>
+
         </ListItem>
 
     if (editActive) {

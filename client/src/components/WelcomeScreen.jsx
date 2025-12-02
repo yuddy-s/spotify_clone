@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import HomeScreen from './PlaylistScreen'
 import AuthContext from '../auth'
 import { Link } from 'react-router-dom'
+import { Redirect } from "react-router-dom";
 
 
 export default function WelcomeScreen() {
@@ -9,7 +10,7 @@ export default function WelcomeScreen() {
     console.log("HomeWrapper auth.loggedIn: " + auth.loggedIn);
     
     if (auth.loggedIn)
-        return <HomeScreen />
+        return <Redirect to="/playlists" />
 
     return (
         <div style={{
