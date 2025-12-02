@@ -1,7 +1,9 @@
 import AppBanner from './AppBanner'
 import EditToolbar from './EditToolbar'
 import WelcomeScreen from './WelcomeScreen.jsx'
-import HomeScreen from './HomeScreen'
+import PlaylistScreen from './PlaylistScreen.js'
+import SongCatalogScreen from './SongCatalogScreen.js'
+import EditAccountScreen from './EditAccountScreen.jsx'
 import ListCard from './PlaylistCard'
 import LoginScreen from './LoginScreen'
 import MUIDeleteModal from './MUIDeleteModal'
@@ -22,7 +24,9 @@ import WorkspaceScreen from './WorkspaceScreen'
 export { 
     AppBanner,  
     EditToolbar, 
-    HomeScreen,
+    PlaylistScreen,
+    SongCatalogScreen,
+    EditAccountScreen,
     WelcomeScreen,
     ListCard, 
     LoginScreen,

@@ -37,6 +37,10 @@ export default function AppBanner() {
         store.closeCurrentList();
     }
 
+    const handleEdit = () => {
+
+    }
+
     const menuId = 'primary-search-account-menu';
     const loggedOutMenu = (
         <Menu
@@ -74,6 +78,7 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
+            <MenuItem onClick={handleMenuClose}><Link to='/editAccount/'>Edit Account</Link></MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>        
 
@@ -82,7 +87,7 @@ export default function AppBanner() {
     if (auth.loggedIn) {
         menu = loggedInMenu;
         if (store.currentList) {
-            editToolbar = <EditToolbar />;
+            editToolbar = "The Playlister";
         }
     }
     
@@ -99,7 +104,7 @@ export default function AppBanner() {
         <Box sx={{flexGrow: 1}}>
             <AppBar position="static"
                 sx={{
-                    background: 'linear-gradient(90deg, #163C90, #2764F3)'
+                    background: '#EE06FF'
                 }}
             >
                 <Toolbar>
@@ -122,8 +127,44 @@ export default function AppBanner() {
                             ⌂
                         </IconButton>
                     </Typography>
+                    
+                    <Link to="/playlists">
+                        <button 
+                            style={{ 
+                                backgroundColor: "#000000", 
+                                color: "white", 
+                                padding: '10px 10px', 
+                                borderRadius: "10px", 
+                                marginLeft: "20px",
+                                border: 'none',
+                                transition: "ease 0.25s" 
+                            }}
+                            onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                            onMouseLeave={(e) => {e.target.style.backgroundColor = "#000000"; e.target.style.color = "#fff"}}
+                        >
+                            Playlists
+                        </button>
+                    </Link>
+                    <Link to="/songs/">
+                        <button 
+                            style={{ 
+                                backgroundColor: "#3A64C4", 
+                                color: "white", 
+                                padding: '10px 10px', 
+                                borderRadius: "10px", 
+                                marginLeft: "20px",
+                                border: '1px solid black',
+                                transition: "ease 0.25s" 
+                            }}
+                            onMouseEnter={(e) => {e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000000"}}
+                            onMouseLeave={(e) => {e.target.style.backgroundColor = "#3A64C4"; e.target.style.color = "#fff"}}
+                        >
+                            Song Catalog
+                        </button>
+                    </Link>
+
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
-                    <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
+                    <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' }, padding: "10px 10px" }}>
                         <IconButton
                             size="large"
                             edge="end"

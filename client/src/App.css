@@ -17,11 +17,11 @@
 }
 
 body {
-  background-color: #2F3136;
+  background-color: #FFE4FE;
 }
 
 #root {
-  background-color: var(--swatch-primary);
+  background-color: #FFFFE4;
   font-family: "Lexend Exa";
   position: absolute;
   width: 80%;

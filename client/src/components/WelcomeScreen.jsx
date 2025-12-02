@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import HomeScreen from './HomeScreen'
+import HomeScreen from './PlaylistScreen'
 import AuthContext from '../auth'
 import { Link } from 'react-router-dom'
 
@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
             <img src="/playlisterLogo.svg" alt="Playlister Logo" style={{ width: '200px', backgroundColor: 'transparent' }} />
 
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                <Link to="/home">
+                <Link to="/playlists">
                     <button 
                         style={{ width: '175px', padding: '10px 20px' }}
                     >
