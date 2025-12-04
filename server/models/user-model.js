@@ -1,16 +1,33 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const ObjectId = Schema.Types.ObjectId
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const UserSchema = new Schema(
-    {
-        firstName: { type: String, required: true },
-        lastName: { type: String, required: true },
-        email: { type: String, required: true },
-        passwordHash: { type: String, required: true },
-        playlists: [{type: ObjectId, ref: 'Playlist'}]
+const UserSchema = new Schema({
+    userName: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
     },
-    { timestamps: true },
-)
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    passwordHash: {
+        type: String,
+        required: true
+    },
+    avatar: {
+        type: String, 
+        default: ""   // base64 string
+    },
 
-module.exports = mongoose.model('User', UserSchema)
+    playlists: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Playlist'
+    }]
+}, { timestamps: true });
+
+module.exports = mongoose.model('User', UserSchema);
