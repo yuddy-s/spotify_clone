@@ -9,10 +9,10 @@ const PlaylistSchema = new Schema({
         trim: true
     },
 
-    ownerEmail: {
-        type: String,
-        required: true,
-        lowercase: true
+    ownerId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
     },
 
     songs: [{
