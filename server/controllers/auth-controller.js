@@ -34,9 +34,9 @@ getLoggedIn = async (req, res) => {
 
 registerUser = async (req, res) => {
     try {
-        const { userName, email, password, passwordVerify } = req.body;
+        const { userName, email, password, passwordVerify, avatar } = req.body;
 
-        if (!userName || !email || !password || !passwordVerify) {
+        if (!userName || !email || !password || !passwordVerify || !avatar) {
             return res.status(400).json({ errorMessage: "Please enter all required fields." });
         }
 
@@ -56,16 +56,25 @@ registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        const newUser = await db.create('User', { userName, email, passwordHash });
+        const newUser = await db.create('User', 
+            { 
+                userName, 
+                email, 
+                passwordHash, 
+                avatar, 
+                playlists: [] 
+            });
 
         const token = auth.signToken(newUser._id);
-        res.cookie("token", token, {
+
+        return res.cookie("token", token, {
             httpOnly: true,
             secure: true,
             sameSite: "none"
         }).status(200).json({
             success: true,
             user: {
+                _id: newUser._id,
                 userName: newUser.userName,
                 email: newUser.email,
                 avatar: newUser.avatar
@@ -193,5 +202,6 @@ module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    editAccount
 };

@@ -10,7 +10,8 @@ export const AuthActionType = {
     GET_LOGGED_IN: "GET_LOGGED_IN",
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
-    REGISTER_USER: "REGISTER_USER"
+    REGISTER_USER: "REGISTER_USER",
+    EDIT_ACCOUNT: "EDIT_ACCOUNT"
 }
 
 function AuthContextProvider(props) {
@@ -56,6 +57,13 @@ function AuthContextProvider(props) {
                     errorMessage: payload.errorMessage
                 })
             }
+            case AuthActionType.EDIT_ACCOUNT: {
+                return setAuth({
+                    user: null,
+                    loggedIn: false,
+                    errorMessage: payload.errorMessage
+                })
+            }
             default:
                 return auth;
         }
@@ -74,10 +82,16 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.registerUser = async function(firstName, lastName, email, password, passwordVerify) {
+    auth.registerUser = async function(userName, email, password, passwordVerify, avatar) {
         console.log("REGISTERING USER");
         try{   
-            const response = await authRequestSender.registerUser(firstName, lastName, email, password, passwordVerify);   
+            const response = await authRequestSender.registerUser(
+                userName, 
+                email, 
+                password, 
+                passwordVerify,
+                avatar
+            );   
             if (response.status === 200) {
                 console.log("Registered Sucessfully");
                 authReducer({
@@ -90,8 +104,8 @@ function AuthContextProvider(props) {
                 })
                 history.push("/login");
                 console.log("NOW WE LOGIN");
-                auth.loginUser(email, password);
-                console.log("LOGGED IN");
+                // auth.loginUser(email, password);
+                // console.log("LOGGED IN");
             }
         } catch(error){
             authReducer({
@@ -142,15 +156,34 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.getUserInitials = function() {
-        let initials = "";
-        if (auth.user) {
-            initials += auth.user.firstName.charAt(0);
-            initials += auth.user.lastName.charAt(0);
+    auth.editAccount = async function (userName, password, avatarBase64) {
+        try {
+            const response = await authRequestSender.editAccount(
+                userName,
+                auth.user.email,
+                auth.user.password || "",
+                password || "",
+                avatarBase64 || ""
+            )
+
+            if (response.status === 200) {
+                authReducer({
+                    type: AuthActionType.EDIT_ACCOUNT,
+                    payload: { errorMessage: null }
+                })
+
+                history.push("/login");
+            }
+        } catch (error) {
+            authReducer({
+                type: AuthActionType.EDIT_ACCOUNT,
+                payload: {
+                    errorMessage: error?.response?.data?.errorMessage
+                }
+            })
         }
-        console.log("user initials: " + initials);
-        return initials;
     }
+
 
     return (
         <AuthContext.Provider value={{
