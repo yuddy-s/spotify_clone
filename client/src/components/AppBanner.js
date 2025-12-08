@@ -92,12 +92,41 @@ export default function AppBanner() {
     }
     
     function getAccountMenu(loggedIn) {
-        let userInitials = "js";
-        console.log("userInitials: " + userInitials);
-        if (loggedIn) 
-            return <div>{userInitials}</div>;
-        else
+        if (loggedIn && auth.user && auth.user.avatar) {
+            return (
+                <img 
+                    src={auth.user.avatar} 
+                    alt="User Avatar" 
+                    style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        objectFit: "cover"
+                    }} 
+                />
+            );
+        } else if (loggedIn) {
+            let initials = auth.user.userName
+                ? auth.user.userName.slice(0, 2).toUpperCase()
+                : "??";
+            return (
+                <div style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    backgroundColor: "#fff",
+                    color: "#000",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontWeight: "bold"
+                }}>
+                    {initials}
+                </div>
+            );
+        } else {
             return <AccountCircle />;
+        }
     }
 
     return (
