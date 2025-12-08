@@ -59,8 +59,8 @@ function AuthContextProvider(props) {
             }
             case AuthActionType.EDIT_ACCOUNT: {
                 return setAuth({
-                    user: null,
-                    loggedIn: false,
+                    user: payload.user || auth.user,
+                    loggedIn: true,
                     errorMessage: payload.errorMessage
                 })
             }
@@ -156,23 +156,27 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.editAccount = async function (userName, password, avatarBase64) {
+    auth.editAccount = async function (userName, email, password, passwordVerify, avatar) {
         try {
             const response = await authRequestSender.editAccount(
                 userName,
-                auth.user.email,
-                auth.user.password || "",
-                password || "",
-                avatarBase64 || ""
+                email,
+                password,
+                passwordVerify,
+                avatar
             )
 
             if (response.status === 200) {
                 authReducer({
                     type: AuthActionType.EDIT_ACCOUNT,
-                    payload: { errorMessage: null }
+                    payload: { 
+                        user: response.data.user,
+                        loggedIn: true,
+                        errorMessage: null 
+                    }
                 })
 
-                history.push("/login");
+                history.push("/playlists");
             }
         } catch (error) {
             authReducer({

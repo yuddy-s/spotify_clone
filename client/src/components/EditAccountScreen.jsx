@@ -17,16 +17,65 @@ export default function EditAccountScreen() {
 
     function handleAvatarChange(e) {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => setAvatar(reader.result);
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+
+        const reader = new FileReader();
+        const img = new Image();
+
+        reader.onload = (event) => {
+            img.onload = () => {
+                if (img.width < 128 || img.height < 128) {
+                    window.alert('Avatar must be at least 128x128 pixels.');
+                    return;
+                }
+
+                setAvatar(img.src);
+            };
+            img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
     }
 
     function handleSave() {
+
         console.log("Saving changes:", { username, email, password, confirmPassword, avatar });
+        
+        if (!username.trim()) {
+            alert("Username cannot be empty or whitespace.");
+            return;
+        }
+
+        if (password && password.length < 8) {
+            alert("Password must be at least 8 characters.");
+            return;
+        }
+
+        if (password && password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        if (!avatar) {
+            alert("You must select an avatar.");
+            return;
+        }
+
+        auth.editAccount(
+            username,
+            email,
+            password,
+            confirmPassword,
+            avatar
+        );
     }
+
+    const isFormValid = () => {
+        if (!username.trim() || !avatar) return false;
+        if (password && password.length < 8) return false;
+        if (password && password !== confirmPassword) return false;
+        return true;
+    };
 
     return (
         <div style={{
@@ -109,6 +158,13 @@ export default function EditAccountScreen() {
                         style={{ display: "none" }}
                         onChange={handleAvatarChange}
                     />
+
+                    {!avatar && (
+                        <span style={{ color: "red", fontSize: "12px" }}>
+                            Avatar is required
+                        </span>
+                    )}
+
                 </div>
 
                 <div style={{
@@ -119,7 +175,10 @@ export default function EditAccountScreen() {
                     flexGrow: 1
                 }}>
                     <input
-                        style={inputStyle}
+                    style={{
+                            ...inputStyle,
+                            borderColor: !username.trim() ? "red" : "#ccc"
+                        }}
                         placeholder="Username"
                         value={username}
                         onChange={e => setUsername(e.target.value)}
@@ -127,18 +186,26 @@ export default function EditAccountScreen() {
                     <input
                         style={inputStyle}
                         placeholder="Email"
+                        color="#6f6f6fff"
                         value={email}
+                        readOnly
                         onChange={e => setEmail(e.target.value)}
                     />
                     <input
-                        style={inputStyle}
+                        style={{
+                            ...inputStyle,
+                            borderColor: password && password.length < 8 ? "red" : "#ccc"
+                        }}
                         placeholder="Password"
                         type="password"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
                     <input
-                        style={inputStyle}
+                        style={{
+                            ...inputStyle,
+                            borderColor: password && password !== confirmPassword ? "red" : "#ccc"
+                        }}
                         placeholder="Confirm Password"
                         type="password"
                         value={confirmPassword}
@@ -148,18 +215,20 @@ export default function EditAccountScreen() {
                     <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "10px" }}>
                         <button
                             style={{
-                                backgroundColor: "#000",
+                                backgroundColor: isFormValid() ? "#000" : "#fe0000ff",
                                 padding: "10px 16px",
                                 color: "white",
                                 borderRadius: "8px",
                                 border: "1px solid black",
                                 cursor: "pointer",
                                 fontWeight: "bold",
-                                transition: "0.25s"
+                                transition: "0.25s",
+                                cursor: isFormValid() ? "pointer" : "not-allowed",
                             }}
                             onMouseEnter={(e) => { e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000" }}
                             onMouseLeave={(e) => { e.target.style.backgroundColor = "#000"; e.target.style.color = "#fff" }}
                             onClick={handleSave}
+                            disabled={!isFormValid()}
                         >
                             Save Changes
                         </button>

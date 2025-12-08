@@ -42,12 +42,18 @@ export const registerUser = async (userName, email, password, passwordVerify, av
     return { status: response.status, data };
 };
 
-export const editAccount = async (userName, email, oldPassword, newPassword, avatarBase64) => {
+export const editAccount = async (userName, email, password, passwordVerify, avatar) => {
     const response = await fetch(baseURL + "/editAccount", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ userName, email, oldPassword, newPassword, avatarBase64 })
+        body: JSON.stringify({ 
+            userName, 
+            email, 
+            password, 
+            passwordVerify, 
+            avatar
+         })
     });
 
     const data = await response.json();
