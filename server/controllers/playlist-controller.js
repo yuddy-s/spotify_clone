@@ -4,34 +4,37 @@ const db = require('../db')
 
 createPlaylist = async (req, res) => {
     const userId = auth.verifyUser(req);
-    if (!userId) return res.status(401).json({ errorMessage: 'UNAUTHORIZED' });
-
-    const body = req.body;
-    if (!body || !body.name) {
-        return res.status(400).json({ errorMessage: 'You must provide a valid playlist name.' });
-    }
+    if (!userId) return res.status(401).json({ success: false, errorMessage: 'UNAUTHORIZED' });
 
     try {
         const user = await db.findById('User', userId);
-        if (!user) return res.status(404).json({ errorMessage: 'User not found' });
+        if (!user) return res.status(404).json({ success: false, errorMessage: 'User not found' });
 
-        // Check unique playlist name per user
-        if (user.playlists.some(pid => {
-            const pl = user.playlists.find(p => p._id.toString() === pid.toString());
-            return pl && pl.name === body.name;
-        })) {
-            return res.status(400).json({ errorMessage: 'You already have a playlist with this name.' });
+        let { name, songs } = req.body;
+        songs = songs || [];
+
+        // generate untitled playlist name
+        if (!name || !name.trim()) {
+            let i = 0;
+            let defaultName;
+            const existingNames = user.playlists.map(pid => db.findById('Playlist', pid)?.name).filter(Boolean);
+            do {
+                defaultName = `Untitled${i}`;
+                i++;
+            } while (existingNames.includes(defaultName));
+            name = defaultName;
         }
 
-        const playlist = await db.create('Playlist', {
-            name: body.name,
-            songs: body.songs || [],
-            ownerId: user._id,
-            listens: 0
-        });
+        // check uniqueness
+        const duplicate = await db.findAll('Playlist');
+        if (duplicate.some(p => p.ownerId.toString() === user._id.toString() && p.name === name)) {
+            return res.status(400).json({ success: false, errorMessage: 'You already have a playlist with this name.' });
+        }
 
-        // Update songs' playlists arrays
-        for (const songId of (body.songs || [])) {
+        const playlist = await db.create('Playlist', { name, songs, ownerId: user._id, listens: 0 });
+
+        // graceful songs handling
+        for (const songId of songs) {
             const song = await db.findById('Song', songId);
             if (song && !song.playlists.includes(playlist._id)) {
                 song.playlists.push(playlist._id);
@@ -42,10 +45,10 @@ createPlaylist = async (req, res) => {
         user.playlists.push(playlist._id);
         await db.update('User', { _id: userId }, { playlists: user.playlists });
 
-        return res.status(201).json({ playlist });
+        return res.status(201).json({ success: true, playlist });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ errorMessage: 'Playlist not created!' });
+        return res.status(500).json({ success: false, errorMessage: 'Playlist not created!' });
     }
 };
 
@@ -53,31 +56,32 @@ createPlaylist = async (req, res) => {
 
 updatePlaylist = async (req, res) => {
     const userId = auth.verifyUser(req);
-    if (!userId) return res.status(401).json({ errorMessage: 'UNAUTHORIZED' });
+    if (!userId) return res.status(401).json({ success: false, errorMessage: 'UNAUTHORIZED' });
 
     const body = req.body;
-    if (!body || !body.playlist) {
-        return res.status(400).json({ errorMessage: 'You must provide a body to update' });
-    }
+    if (!body || !body.playlist) return res.status(400).json({ success: false, errorMessage: 'No playlist data provided' });
 
     try {
         const playlist = await db.findById('Playlist', req.params.id);
-        if (!playlist) return res.status(404).json({ errorMessage: 'Playlist not found' });
+        if (!playlist) return res.status(404).json({ success: false, errorMessage: 'Playlist not found' });
 
-        // Check ownership
-        if (playlist.ownerId.toString() !== userId.toString()) {
-            return res.status(403).json({ errorMessage: 'Not your playlist' });
+        if (playlist.ownerId.toString() !== userId.toString())
+            return res.status(403).json({ success: false, errorMessage: 'Not your playlist' });
+
+        // Name uniqueness check
+        const userPlaylists = await db.findAll('Playlist');
+        if (userPlaylists.some(p => p.ownerId.toString() === userId.toString() && p._id.toString() !== playlist._id.toString() && p.name === body.playlist.name)) {
+            return res.status(400).json({ success: false, errorMessage: 'Playlist name already exists' });
         }
 
-        const newSongs = body.playlist.songs.map(id => id.toString());
-        const oldSongs = playlist.songs.map(id => id.toString());
+        const newSongs = (body.playlist.songs || []).map(String);
+        const oldSongs = (playlist.songs || []).map(String);
 
-        // Songs added and removed
-        const addedSongs = newSongs.filter(id => !oldSongs.includes(id));
-        const removedSongs = oldSongs.filter(id => !newSongs.includes(id));
+        // Add / remove songs
+        const added = newSongs.filter(id => !oldSongs.includes(id));
+        const removed = oldSongs.filter(id => !newSongs.includes(id));
 
-        // Update songs playlists arrays
-        for (const songId of addedSongs) {
+        for (const songId of added) {
             const song = await db.findById('Song', songId);
             if (song && !song.playlists.includes(playlist._id)) {
                 song.playlists.push(playlist._id);
@@ -85,23 +89,22 @@ updatePlaylist = async (req, res) => {
             }
         }
 
-        for (const songId of removedSongs) {
+        for (const songId of removed) {
             const song = await db.findById('Song', songId);
-            if (song && song.playlists.includes(playlist._id)) {
-                song.playlists = song.playlists.filter(pid => pid.toString() !== playlist._id.toString());
+            if (song) {
+                song.playlists = (song.playlists || []).filter(pid => pid.toString() !== playlist._id.toString());
                 await db.update('Song', { _id: songId }, { playlists: song.playlists });
             }
         }
 
-        // Update playlist itself
         playlist.name = body.playlist.name;
         playlist.songs = newSongs;
         await db.update('Playlist', { _id: playlist._id }, { name: playlist.name, songs: playlist.songs });
 
-        return res.status(200).json({ success: true, id: playlist._id, message: 'Playlist updated!' });
+        return res.status(200).json({ success: true, playlist });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ errorMessage: 'Failed to update playlist' });
+        return res.status(500).json({ success: false, errorMessage: 'Failed to update playlist' });
     }
 };
 
@@ -143,22 +146,30 @@ deletePlaylist = async (req, res) => {
 
 copyPlaylist = async (req, res) => {
     const userId = auth.verifyUser(req);
-    if (!userId) return res.status(401).json({ errorMessage: 'UNAUTHORIZED' });
+    if (!userId) return res.status(401).json({ success: false, errorMessage: 'UNAUTHORIZED' });
 
     try {
         const original = await db.findById('Playlist', req.params.id);
-        if (!original) return res.status(404).json({ errorMessage: 'Original playlist not found' });
+        if (!original) return res.status(404).json({ success: false, errorMessage: 'Original playlist not found' });
 
         const user = await db.findById('User', userId);
 
+        // Ensure unique name
+        let newName = original.name + ' (Copy)';
+        const userPlaylists = await db.findAll('Playlist');
+        let i = 1;
+        while (userPlaylists.some(p => p.ownerId.toString() === userId.toString() && p.name === newName)) {
+            newName = `${original.name} (Copy ${i})`;
+            i++;
+        }
+
         const copy = await db.create('Playlist', {
-            name: original.name + ' (Copy)',
+            name: newName,
             songs: original.songs,
             ownerId: user._id,
             listens: 0
         });
 
-        // Update songs playlists arrays
         for (const songId of original.songs) {
             const song = await db.findById('Song', songId);
             if (song && !song.playlists.includes(copy._id)) {
@@ -170,36 +181,53 @@ copyPlaylist = async (req, res) => {
         user.playlists.push(copy._id);
         await db.update('User', { _id: userId }, { playlists: user.playlists });
 
-        return res.status(201).json({ playlist: copy });
+        return res.status(201).json({ success: true, playlist: copy });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ errorMessage: 'Failed to copy playlist' });
+        return res.status(500).json({ success: false, errorMessage: 'Failed to copy playlist' });
     }
 };
 
 getAllPlaylists = async (req, res) => {
     try {
-        const { playlistName, ownerName, songTitle, songArtist, songYear, sortBy, order } = req.query;
-        const sortOrder = order === 'desc' ? -1 : 1;
+        const userId = auth.verifyUser(req);
+        const {
+            playlistName,
+            ownerName,
+            songTitle,
+            songArtist,
+            songYear,
+            sortBy,
+            order
+        } = req.query;
 
-        // Build base sort criteria
-        let sortCriteria = {};
-        if (sortBy === 'name') sortCriteria.name = sortOrder;
-        else if (sortBy === 'listens') sortCriteria.listens = sortOrder;
-        else if (sortBy === 'owner') sortCriteria['ownerId.userName'] = sortOrder;
-        else sortCriteria.createdAt = -1;
+        const sortOrder = order === "desc" ? -1 : 1;
 
-        //  Find playlists matching playlist name
-        let playlistQuery = {};
-        if (playlistName) playlistQuery.name = { $regex: playlistName, $options: 'i' }; // case-insensitive
+        // guest users see nothing without filters
+        const hasFilters = playlistName || ownerName || songTitle || songArtist || songYear;
+        if (!userId && !hasFilters) {
+            return res.status(200).json({ playlists: [] });
+        }
 
-        // Fetch playlists and populate owner and songs
-        let playlists = await Playlist.find(playlistQuery)
-            .populate('ownerId', 'userName')
-            .populate('songs') // populate all song fields
+        //  query by playlist name
+        let query = {};
+        if (playlistName) {
+            query.name = { $regex: playlistName, $options: "i" };
+        }
+
+        let playlists = await Playlist.find(query)
+            .populate("ownerId", "userName")
+            .populate("songs")
             .exec();
 
-        // Filter by ownerName and songs criteria
+        // if logged in user with no filters  show only their playlists
+        if (userId && !hasFilters) {
+            playlists = playlists.filter(
+                p => p.ownerId._id.toString() === userId.toString()
+            );
+        }
+
+        // Filter by ownerName & song criteria
         playlists = playlists.filter(p => {
             const ownerMatch = ownerName
                 ? p.ownerId.userName.toLowerCase().includes(ownerName.toLowerCase())
@@ -207,6 +235,7 @@ getAllPlaylists = async (req, res) => {
 
             const songMatch = (songTitle || songArtist || songYear)
                 ? p.songs.some(s =>
+                    s &&
                     (!songTitle || s.title.toLowerCase().includes(songTitle.toLowerCase())) &&
                     (!songArtist || s.artist.toLowerCase().includes(songArtist.toLowerCase())) &&
                     (!songYear || s.year === parseInt(songYear))
@@ -216,21 +245,34 @@ getAllPlaylists = async (req, res) => {
             return ownerMatch && songMatch;
         });
 
-        // Sort manually if owner sort (since populated fields)
-        if (sortBy === 'owner') {
-            playlists.sort((a, b) => {
-                if (a.ownerId.userName < b.ownerId.userName) return -1 * sortOrder;
-                if (a.ownerId.userName > b.ownerId.userName) return 1 * sortOrder;
-                return 0;
-            });
+        if (sortBy === "name") {
+            playlists.sort((a, b) => a.name.localeCompare(b.name) * sortOrder);
+        }
+        else if (sortBy === "listens") {
+            playlists.sort((a, b) => (a.listens - b.listens) * sortOrder);
+        }
+        else if (sortBy === "owner") {
+            playlists.sort(
+                (a, b) =>
+                    a.ownerId.userName.localeCompare(b.ownerId.userName) * sortOrder
+            );
+        }
+        else {
+            playlists.sort((a, b) => b.createdAt - a.createdAt);
         }
 
         return res.status(200).json({ playlists });
+
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ errorMessage: 'Error fetching playlists' });
+        return res.status(500).json({
+            playlists: [],
+            errorMessage: "Error fetching playlists"
+        });
     }
 };
+
+
 
 getPlaylistById = async (req, res) => {
     try {
