@@ -50,7 +50,7 @@ export const playPlaylist = async (id) => {
 // ======================
 
 export const createPlaylist = async (newListName, newSongs) => {
-    const response = await fetch(playlistBaseURL + "/playlist", {
+    const response = await fetch(playlistBaseURL + "/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

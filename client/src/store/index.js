@@ -39,6 +39,7 @@ const tps = new jsTPS();
 
 const CurrentModal = {
     NONE : "NONE",
+    PLAY_PLAYLIST: "PLAY_PLAYLIST",
     DELETE_LIST : "DELETE_LIST",
     EDIT_SONG : "EDIT_SONG",
     ERROR : "ERROR"
@@ -281,43 +282,62 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
-        let newListName = "Untitled" + store.newListCounter;
-        const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
-        console.log("createNewList response: " + response);
-        if (response.status === 201) {
-            tps.clearAllTransactions();
-            let newList = response.data.playlist;
-            storeReducer({
-                type: GlobalStoreActionType.CREATE_NEW_LIST,
-                payload: newList
-            }
-            );
+        try {
+            const response = await storeRequestSender.createPlaylist("", []);
+            if (response.status === 201 && response.data.success) {
+                tps.clearAllTransactions();
+                const newList = response.data.playlist;
+                storeReducer({
+                    type: GlobalStoreActionType.CREATE_NEW_LIST,
+                    payload: newList
+                });
 
-            // IF IT'S A VALID LIST THEN LET'S START EDITING IT
-            history.push("/playlist/" + newList._id);
+                store.loadIdNamePairs();
+            } else {
+                console.log("Failed to create a new playlist");
+            }
+        } catch (err) {
+            console.error("Error creating new playlist:", err);
         }
-        else {
-            console.log("FAILED TO CREATE A NEW LIST");
-        }
-    }
+    };
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = function () {
         async function asyncLoadIdNamePairs() {
-            const response = await storeRequestSender.getPlaylistPairs();
-            if (response.data.success) {
-                let pairsArray = response.data.idNamePairs;
-                console.log(pairsArray);
-                storeReducer({
-                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
-                    payload: pairsArray
-                });
-            }
-            else {
-                console.log("FAILED TO GET THE LIST PAIRS");
+            try {
+                const response = await storeRequestSender.getPlaylistPairs();
+                if (response.data.success) {
+                    storeReducer({
+                        type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                        payload: response.data.idNamePairs
+                    });
+                } else {
+                    console.log("Failed to get playlist pairs");
+                }
+            } catch (err) {
+                console.error("Error loading playlist pairs:", err);
             }
         }
         asyncLoadIdNamePairs();
+    }
+
+    // FUNCTION TO INCREMENT LISTENERS FOR A PLAYLIST 
+    store.incrementPlaylistPlays = async function (playlistId) {
+        try {
+            const response = await storeRequestSender.playPlaylist(playlistId);
+            if (response.status === 200 && response.data.success) {
+                // Update local store if this playlist is the current one
+                if (store.currentList && store.currentList._id === playlistId) {
+                    storeReducer({
+                        type: GlobalStoreActionType.UPDATE_CURRENT_LIST_LISTENS,
+                        payload: response.data.listens
+                    });
+                }
+            }
+            return response;
+        } catch (err) {
+            console.error("Failed to increment playlist listens:", err);
+        }
     }
 
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
@@ -333,16 +353,23 @@ function GlobalStoreContextProvider(props) {
                     type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
                     payload: {id: id, playlist: playlist}
                 });
+                store.showDeleteListModal();
             }
         }
         getListToDelete(id);
     }
+    store.showDeleteListModal = function () {
+        storeReducer({
+            type: GlobalStoreActionType.SHOW_MODAL,
+            payload: { modal: CurrentModal.DELETE_LIST }
+        });
+    }
     store.deleteList = function (id) {
         async function processDelete(id) {
-            let response = await storeRequestSender.deletePlaylistById(id);
+            const response = await storeRequestSender.deletePlaylistById(id);
             store.loadIdNamePairs();
             if (response.data.success) {
-                history.push("/");
+                console.log("Playlist deleted:", id);
             }
         }
         processDelete(id);
@@ -384,21 +411,41 @@ function GlobalStoreContextProvider(props) {
     // moveItem, updateItem, updateCurrentList, undo, and redo
     store.setCurrentList = function (id) {
         async function asyncSetCurrentList(id) {
-            let response = await storeRequestSender.getPlaylistById(id);
-            if (response.data.success) {
-                let playlist = response.data.playlist;
-
-                response = await storeRequestSender.updatePlaylistById(playlist._id, playlist);
+            try {
+                const response = await storeRequestSender.getPlaylistById(id);
                 if (response.data.success) {
+                    const playlist = response.data.playlist;
                     storeReducer({
                         type: GlobalStoreActionType.SET_CURRENT_LIST,
                         payload: playlist
                     });
-                    history.push("/playlist/" + playlist._id);
+
+                    // Open the modal for playing the playlist
+                    store.showPlayPlaylistModal();
                 }
+            } catch (err) {
+                console.error("Failed to set current list:", err);
             }
         }
         asyncSetCurrentList(id);
+    }
+
+    store.showPlayPlaylistModal = function () {
+        storeReducer({
+            type: GlobalStoreActionType.SHOW_MODAL,
+            payload: { modal: CurrentModal.PLAY_PLAYLIST }
+        });
+    }
+
+    store.hidePlayPlaylistModal = function () {
+        storeReducer({
+            type: GlobalStoreActionType.HIDE_MODALS,
+            payload: {}
+        });
+    }
+
+    store.isPlayPlaylistModalOpen = function () {
+        return store.currentModal === CurrentModal.PLAY_PLAYLIST;
     }
 
     store.getPlaylistSize = function() {
@@ -466,7 +513,32 @@ function GlobalStoreContextProvider(props) {
         store.addCreateSongTransaction(
             playlistSize, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
     }
-    // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
+
+    // NEW FUNCTIONS ADDED FOR GLOBAL SONGS / SONGS CATALOG FOR FINAL PROJECT YO
+    store.loadAllSongs = async () => {
+        const response = await storeRequestSender.getAllSongs();
+        if (response.status === 200 && response.data.success) {
+            setStore(prev => ({ ...prev, songs: response.data.data }))
+        }
+    }
+
+    store.createGlobalSong = async (title, artist, year, youTubeId) => {
+        return await storeRequestSender.createSong(title, artist, year, youTubeId)
+    }
+
+    store.updateGlobalSong = async (id, songData) => {
+    return await storeRequestSender.updateSongById(id, songData);
+    }
+
+    store.deleteGlobalSong = async (id) => {
+        return await storeRequestSender.deleteSongById(id);
+    }
+
+    store.incrementSongPlays = async (id) => {
+        return await storeRequestSender.incrementSongPlays(id);
+    }
+
+    // THIS FUNCTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
     store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
         // ADD A SONG ITEM AND ITS NUMBER
         let song = {
@@ -500,18 +572,23 @@ function GlobalStoreContextProvider(props) {
         let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);        
         tps.processTransaction(transaction);
     }
-    store.updateCurrentList = function() {
+    store.updateCurrentList = function () {
         async function asyncUpdateCurrentList() {
-            const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
-            if (response.data.success) {
-                storeReducer({
-                    type: GlobalStoreActionType.SET_CURRENT_LIST,
-                    payload: store.currentList
-                });
+            try {
+                const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
+                if (response.data.success) {
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: store.currentList
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to update current playlist:", err);
             }
         }
         asyncUpdateCurrentList();
     }
+
     store.undo = function () {
         tps.undoTransaction();
     }

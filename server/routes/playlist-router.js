@@ -15,7 +15,7 @@ router.get('/pairs', PlaylistController.getPlaylistPairs)
 router.get('/:id', PlaylistController.getPlaylistById) 
 
 // owner only
-router.post('/playlist', auth.verify, PlaylistController.createPlaylist) 
+router.post('/create', auth.verify, PlaylistController.createPlaylist) 
 router.put('/:id', auth.verify, PlaylistController.updatePlaylist) 
 router.delete('/:id', auth.verify, PlaylistController.deletePlaylist) 
 

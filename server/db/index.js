@@ -7,11 +7,12 @@ console.log("MONGO_URI =", process.env.MONGO_URI);
 
 const Playlist = require('../models/playlist-model')
 const User = require('../models/user-model')
+const Song = require('../models/song-model')
 
 
 class MongoDBManager {
     constructor() {
-        this.models = { Playlist, User };
+        this.models = { Playlist, User, Song };
         this.connected = false;
     }
 

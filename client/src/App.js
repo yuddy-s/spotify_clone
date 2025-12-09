@@ -10,7 +10,6 @@ import {
     EditAccountScreen,
     LoginScreen,
     RegisterScreen,
-    Statusbar,
     WorkspaceScreen
 } from './components'
 import WelcomeScreen from './components/WelcomeScreen.jsx';
@@ -36,7 +35,6 @@ const App = () => {
                         <Route path="/register/" exact component={RegisterScreen} />
                         <Route path="/playlist/:id" exact component={WorkspaceScreen} />
                     </Switch>
-                    <Statusbar />
                 </GlobalStoreContextProvider>
             </AuthContextProvider>
         </BrowserRouter>

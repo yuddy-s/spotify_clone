@@ -15,20 +15,17 @@ createPlaylist = async (req, res) => {
 
         // generate untitled playlist name
         if (!name || !name.trim()) {
+            const userPlaylists = (await db.findAll('Playlist')).filter(p => p.ownerId.toString() === user._id.toString());
+            const existingNames = userPlaylists.map(p => p.name);
+
             let i = 0;
             let defaultName;
-            const existingNames = user.playlists.map(pid => db.findById('Playlist', pid)?.name).filter(Boolean);
             do {
                 defaultName = `Untitled${i}`;
                 i++;
             } while (existingNames.includes(defaultName));
-            name = defaultName;
-        }
 
-        // check uniqueness
-        const duplicate = await db.findAll('Playlist');
-        if (duplicate.some(p => p.ownerId.toString() === user._id.toString() && p.name === name)) {
-            return res.status(400).json({ success: false, errorMessage: 'You already have a playlist with this name.' });
+            name = defaultName;
         }
 
         const playlist = await db.create('Playlist', { name, songs, ownerId: user._id, listens: 0 });
@@ -273,18 +270,46 @@ getAllPlaylists = async (req, res) => {
 };
 
 
-
 getPlaylistById = async (req, res) => {
     try {
         const playlist = await db.findById('Playlist', req.params.id);
-        if (!playlist) return res.status(404).json({ errorMessage: 'Playlist not found' });
-        return res.status(200).json({ playlist });
+        if (!playlist) return res.status(404).json({ errorMessage: "Playlist not found" });
+
+        const owner = await db.findById('User', playlist.ownerId);
+        const ownerName = owner ? owner.userName : "Unknown";
+        const ownerAvatar = owner ? owner.avatar : "/default-avatar.png";
+
+        // populate full song objects
+        const songs = [];
+        for (const songId of playlist.songs || []) {
+            const song = await db.findById('Song', songId);
+            if (song) {
+                songs.push({
+                    _id: song._id.toString(),
+                    title: song.title,
+                    artist: song.artist,
+                    year: song.year,
+                    youTubeId: song.youTubeId
+                });
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            playlist: {
+                _id: playlist._id,
+                name: playlist.name,
+                ownerName,
+                ownerAvatar,
+                listens: playlist.listens || 0,
+                songs
+            }
+        });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ errorMessage: 'Error fetching playlist' });
+        console.error("getPlaylistById error:", err);
+        return res.status(500).json({ errorMessage: "Error fetching playlist" });
     }
 };
-
 
 playPlaylist = async (req, res) => {
     try {
@@ -305,11 +330,20 @@ playPlaylist = async (req, res) => {
 getPlaylistPairs = async (req, res) => {
     try {
         const playlists = await db.findAll('Playlist');
-        const idNamePairs = playlists.map(p => ({ _id: p._id, name: p.name }));
-        return res.status(200).json({ idNamePairs });
+        const idNamePairs = await Promise.all(playlists.map(async (p) => {
+            const owner = await db.findById('User', p.ownerId);
+            return {
+                _id: p._id,
+                name: p.name,
+                ownerName: owner?.userName || "Unknown",
+                ownerAvatar: owner?.avatar || "https://i.pravatar.cc/40",
+                listens: p.listens || 0
+            };
+        }));
+        return res.status(200).json({ success: true, idNamePairs });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ errorMessage: 'Error fetching playlist pairs' });
+        return res.status(500).json({ success: false, errorMessage: 'Error fetching playlist pairs' });
     }
 };
 
