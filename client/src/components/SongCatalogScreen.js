@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { GlobalStoreContext } from '../store';
 import SongCard from './SongCard';
-import MUIDeleteModal from './MUIDeleteModal';
 
 const SongCatalogScreen = () => {
     const { store } = useContext(GlobalStoreContext);
@@ -192,7 +191,6 @@ const SongCatalogScreen = () => {
                     ))}
                 </div>
 
-                <MUIDeleteModal />
             </div>
         </div>
     );

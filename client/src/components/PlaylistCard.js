@@ -1,10 +1,14 @@
 import { useContext, useState } from 'react';
 import { GlobalStoreContext } from '../store';
 import storeRequestSender from "../store/requests";
+
 import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
+
 import PlayPlaylistModal from './PlayPlaylistModal';
 import MUIDeleteModal from './MUIDeleteModal';
+import EditPlaylistModal from './EditPlaylistModal';
+
 
 function PlaylistCard(props) {
     const { store } = useContext(GlobalStoreContext);
@@ -15,6 +19,7 @@ function PlaylistCard(props) {
     // Modal states
     const [isPlayModalOpen, setIsPlayModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
    
     const handlePlayClick = async (event) => {
@@ -40,6 +45,49 @@ function PlaylistCard(props) {
     const handleConfirmDelete = async () => {
         await store.deleteList(idNamePair._id); // directly delete
         setIsDeleteModalOpen(false);
+    };
+
+    const handleCopyClick = async (event) => {
+        event.stopPropagation();
+        try {
+            let copyIndex = 0;
+            let newName = idNamePair.name + " (copy)";
+
+            // Get all playlists for checking duplicates
+            const response = await storeRequestSender.getAllPlaylists();
+            const allPlaylists = response.data.playlists || [];
+
+            while (allPlaylists.some(p => p.ownerId._id === store.user._id && p.name === newName)) {
+                copyIndex++;
+                newName = idNamePair.name + ` (copy ${copyIndex})`;
+            }
+
+            // Create a new playlist with the same songs
+            const createResponse = await storeRequestSender.createPlaylist(newName, idNamePair.songs || []);
+            if (createResponse.status === 201 && createResponse.data.success) {
+                // Refresh playlist list
+                store.loadIdNamePairs();
+            } else {
+                console.error("Failed to copy playlist");
+            }
+        } catch (err) {
+            console.error("Error copying playlist:", err);
+        }
+    };
+
+    const handleEditClick = async (event) => {
+        event.stopPropagation();
+        try {
+            const response = await storeRequestSender.getPlaylistById(idNamePair._id);
+            if (!response.data.playlist) throw new Error('Failed to fetch playlist');
+
+            store.currentList = response.data.playlist;
+
+       
+            setIsEditModalOpen(true);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (
@@ -95,12 +143,14 @@ function PlaylistCard(props) {
                     style={{ backgroundColor: "#3A64C4", color: "white", padding: '10px 10px', borderRadius: "10px", marginLeft: "10px", border: '1px solid black', transition: "ease 0.25s" }}
                     onMouseEnter={(e) => { e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000"; }}
                     onMouseLeave={(e) => { e.target.style.backgroundColor = "#3A64C4"; e.target.style.color = "#fff"; }}
+                    onClick={handleEditClick}
                 >
                     Edit
                 </button>
 
                 <button 
                     style={{ backgroundColor: "#077836", color: "white", padding: '10px 10px', borderRadius: "10px", marginLeft: "10px", border: '1px solid black', transition: "ease 0.25s" }}
+                    onClick={handleCopyClick}
                     onMouseEnter={(e) => { e.target.style.backgroundColor = "#fff"; e.target.style.color = "#000"; }}
                     onMouseLeave={(e) => { e.target.style.backgroundColor = "#077836"; e.target.style.color = "#fff"; }}
                 >
@@ -135,6 +185,17 @@ function PlaylistCard(props) {
                     playlist={idNamePair}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleConfirmDelete}
+                />
+            )}
+
+            {isEditModalOpen && (
+                <EditPlaylistModal
+                    open={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        store.currentList = null; // clear current list in store
+                        store.loadIdNamePairs();   // refresh playlists
+                    }}
                 />
             )}
         </>
