@@ -1,9 +1,12 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { GlobalStoreContext } from '../store';
 
 import { Menu, MenuItem, IconButton } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Button from '@mui/material/Button';
+
+import MUIDeleteSongModal from './MUIDeleteSongModal'; // import the modal
+import MUIEditSongModal from './MUIEditSongModal';
+
 
 function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
@@ -12,9 +15,22 @@ function SongCard(props) {
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
 
-    // submenu for playlists
     const [playlistMenuAnchor, setPlaylistMenuAnchor] = useState(null);
     const isPlaylistMenuOpen = Boolean(playlistMenuAnchor);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    const [userPlaylists, setUserPlaylists] = useState([]);
+
+    useEffect(() => {
+        const fetchPlaylists = async () => {
+            if (!store || !store.loadMyPlaylists) return;
+            const playlists = await store.loadMyPlaylists();
+            setUserPlaylists(playlists || []);
+        };
+        fetchPlaylists();
+    }, []); 
 
     const handleMenuOpen = (event) => {
         event.stopPropagation();
@@ -34,69 +50,77 @@ function SongCard(props) {
         setPlaylistMenuAnchor(null);
     };
 
-    // Menu actions ------------------------
-    const handleAddToPlaylist = (playlistId) => {
-        alert("Would add song to playlist: " + playlistId + " (TODO)");
-        handlePlaylistMenuClose();
-        handleMenuClose();
+    const handleAddToPlaylist = async (playlistId) => {
+        try {
+            await store.addSongToPlaylist(song._id, playlistId);
+            alert(`Added "${song.title}" to playlist!`);
+        } catch (err) {
+            console.error("Failed to add song to playlist:", err);
+            alert("Failed to add song to playlist");
+        } finally {
+            handlePlaylistMenuClose();
+            handleMenuClose();
+        }
     };
 
     const handleEditSong = () => {
-        store.showEditSongModal(index, song);
+        setShowEditModal(true);
         handleMenuClose();
     };
 
+ 
     const handleRemoveFromCatalog = () => {
-        store.addRemoveSongTransaction(song, index);
+        setShowDeleteModal(true);
         handleMenuClose();
     };
-    // -------------------------------------
 
+ 
+    const handleConfirmDelete = async () => {
+        await store.deleteSong(song._id, index);  
+        setShowDeleteModal(false);
+    };
 
-    function handleDragStart(event) {
-        event.dataTransfer.setData("song", index);
-    }
-    function handleDragOver(event) { event.preventDefault(); }
-    function handleDragEnter(event) { event.preventDefault(); }
-    function handleDragLeave(event) { event.preventDefault(); }
-    function handleDrop(event) {
-        event.preventDefault();
-        let targetIndex = index;
-        let sourceIndex = Number(event.dataTransfer.getData("song"));
-
-        store.addMoveSongTransaction(sourceIndex, targetIndex);
-    }
-
-    // DOUBLE CLICK → EDIT
-    function handleClick(event) {
-        if (event.detail === 2) {
-            store.showEditSongModal(index, song);
-        }
-    }
-
-    let cardClass = "list-card unselected-list-card";
+    const handleConfirmEdit = async (updatedSong) => {
+        await store.editSong(updatedSong, index); 
+        setShowEditModal(false);
+    };
 
     return (
         <div
             key={index}
             id={'song-' + index + '-card'}
-            className={cardClass}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            draggable="true"
-            onClick={handleClick}
-            style={{ position: "relative" }}
+            className="song-card"
+            style={{
+                backgroundColor: store.currentSongIndex === index ? "#f6b749ff" : "#FFE66D",
+                border: "2px solid black",
+                borderRadius: "8px",
+                padding: "12px",
+                marginBottom: "10px",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+            }}
         >
-            {index + 1}.
-            <a
-                id={'song-' + index + '-link'}>
-                {song.title} ({song.year}) by {song.artist}
-            </a>
+            <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+                {index + 1}. {song.title} ({song.year})
+            </div>
 
-            {/* 3 dot menu button */}
+            <div style={{ fontSize: "14px" }}>
+                by {song.artist}
+            </div>
+
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "8px",
+                fontSize: "13px",
+                opacity: 0.85
+            }}>
+                <div> {song.listens} listens</div>
+                <div>{song.playlists.length} playlists</div>
+            </div>
+
             <IconButton
                 onClick={handleMenuOpen}
                 sx={{ position: "absolute", right: "10px", top: "10px" }}
@@ -104,7 +128,6 @@ function SongCard(props) {
                 <MoreVertIcon />
             </IconButton>
 
-            {/* Main menu */}
             <Menu
                 anchorEl={anchorEl}
                 open={isMenuOpen}
@@ -117,7 +140,7 @@ function SongCard(props) {
                 <MenuItem onClick={handleRemoveFromCatalog}>Remove from Catalog</MenuItem>
             </Menu>
 
-            {/* Playlist sub menu */}
+            {/* Playlist submenu */}
             <Menu
                 anchorEl={playlistMenuAnchor}
                 open={isPlaylistMenuOpen}
@@ -125,11 +148,31 @@ function SongCard(props) {
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
-                {/* Hard coded testing playlists */}
-                <MenuItem onClick={() => handleAddToPlaylist("playlist1")}>My Playlist 1</MenuItem>
-                <MenuItem onClick={() => handleAddToPlaylist("playlist2")}>Chill Vibes</MenuItem>
-                <MenuItem onClick={() => handleAddToPlaylist("playlist3")}>Workout Mix</MenuItem>
+                {userPlaylists.length > 0 ? (
+                    userPlaylists.map(p => (
+                        <MenuItem key={p._id} onClick={() => handleAddToPlaylist(p._id)}>
+                            {p.name}
+                        </MenuItem>
+                    ))
+                ) : (
+                    <MenuItem disabled>No playlists found</MenuItem>
+                )}
             </Menu>
+
+            {showDeleteModal && (
+                <MUIDeleteSongModal
+                    song={song}
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={handleConfirmDelete}
+                />
+            )}
+            {showEditModal && (
+                <MUIEditSongModal
+                    song={song}
+                    onClose={() => setShowEditModal(false)}
+                    onConfirm={handleConfirmEdit}
+                />
+            )}
         </div>
     );
 }

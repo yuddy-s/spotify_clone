@@ -1,79 +1,21 @@
 const auth = require('../auth');
 const db = require('../db');
 
-
 getAllSongs = async (req, res) => {
     try {
-        const userId = auth.verifyUser(req);
-        const {
-            title,
-            artist,
-            year,
-            sortBy,
-            order
-        } = req.query;
+        // Ensure DB connection
+        await db.autoConnect();
 
-        const sortOrder = order === "desc" ? -1 : 1;
-        const hasFilters = title || artist || year;
-
-        // guest with no search filters return nothing
-        if (!userId && !hasFilters) {
-            return res.status(200).json({ songs: [] });
-        }
-
-        let query = {};
-        if (title) query.title = { $regex: title, $options: "i" };
-        if (artist) query.artist = { $regex: artist, $options: "i" };
-        if (year) query.year = parseInt(year);
-
-        let songs = await Song.find(query).exec();
-
-        // logged in user with no filters  return only their songs
-        if (userId && !hasFilters) {
-            songs = songs.filter(
-                s => s.ownerId.toString() === userId.toString()
-            );
-        }
-
-        // Sorting
-        switch (sortBy) {
-            case "title":
-                songs.sort((a, b) => a.title.localeCompare(b.title) * sortOrder);
-                break;
-
-            case "artist":
-                songs.sort((a, b) => a.artist.localeCompare(b.artist) * sortOrder);
-                break;
-
-            case "year":
-                songs.sort((a, b) => (a.year - b.year) * sortOrder);
-                break;
-
-            case "listens":
-                songs.sort((a, b) => (a.listens - b.listens) * sortOrder);
-                break;
-
-            case "playlists":
-                songs.sort((a, b) =>
-                    ((a.playlists?.length || 0) - (b.playlists?.length || 0)) * sortOrder
-                );
-                break;
-
-            default:
-                // Default sort: newest first
-                songs.sort((a, b) => b.createdAt - a.createdAt);
-        }
+        // Get all songs
+        const songs = await db.findAll('Song');
 
         return res.status(200).json({ songs });
-
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            songs: [],
-            errorMessage: "Error fetching songs"
-        });
+        console.error("getAllSongs error:", err);
+        return res.status(500).json({ songs: [], errorMessage: "Error fetching songs" });
     }
 };
+
 
 createSong = async (req, res) => {
     const userId = auth.verifyUser(req);

@@ -96,25 +96,33 @@ export const copyPlaylist = async (id) => {
 };
 
 // SONG REQUEST METHODS --------------------------
-export const getAllSongs = async (options = {}) => {
-    // options: { title, artist, year, sortBy, order }
-    const params = new URLSearchParams(options).toString();
-    const response = await fetch(`${songBaseURL}/?${params}`, {
+export const getAllSongs = async () => {
+    const response = await fetch(`${songBaseURL}/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
+
     const data = await response.json();
+    console.log("getAllSongs response:", data);
     return { status: response.status, data };
 };
 
-// owner-only / requires auth
-export const createSong = async (title, artist, year, youTubeId) => {
+ 
+export const createSong = async () => {
+    const newSongData = {
+        title: "Untitled",
+        artist: "???",
+        year: 2000,
+        youTubeId: "dQw4w9WgXcQ"  
+    };
+
     const response = await fetch(songBaseURL + "/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, artist, year, youTubeId }),
-        credentials: "include"
+        credentials: "include",
+        body: JSON.stringify(newSongData)
     });
+
     const data = await response.json();
     return { status: response.status, data };
 };

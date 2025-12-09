@@ -1,103 +1,118 @@
-import { useContext, useState } from 'react'
-import GlobalStoreContext from '../store';
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
+import { useState, useEffect } from 'react';
 
-const style1 = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 345,
-    height: 250,
-    backgroundSize: "contain",
-    backgroundImage: `url(https://i.insider.com/602ee9ced3ad27001837f2ac?})`,
-    border: '3px solid #000',
-    padding: '20px',
-    boxShadow: 24,
-};
+export default function MUIEditSongModal({ song, index, onClose, onConfirm }) {
+    const [title, setTitle] = useState('');
+    const [artist, setArtist] = useState('');
+    const [year, setYear] = useState('');
+    const [youTubeId, setYouTubeId] = useState('');
 
-export default function MUIEditSongModal() {
-    const { store } = useContext(GlobalStoreContext);
-    const [ title, setTitle ] = useState(store.currentSong.title);
-    const [ artist, setArtist ] = useState(store.currentSong.artist);
-    const [ year, setYear ] = useState(store.currentSong.year);
-    const [ youTubeId, setYouTubeId ] = useState(store.currentSong.youTubeId);
+    // Autofill modal fields when opened
+    useEffect(() => {
+        if (song) {
+            setTitle(song.title || '');
+            setArtist(song.artist || '');
+            setYear(song.year ? song.year.toString() : '');
+            setYouTubeId(song.youTubeId || ''); // <-- autofill YouTube ID
+        }
+    }, [song]);
 
-    function handleConfirmEditSong() {
-        let newSongData = {
-            title: title,
-            artist: artist,
-            year: year,
-            youTubeId: youTubeId
-        };
-        store.addUpdateSongTransaction(store.currentSongIndex, newSongData);        
-    }
-
-    function handleCancelEditSong() {
-        store.hideModals();
-    }
-
-    function handleUpdateTitle(event) {
-        setTitle(event.target.value);
-    }
-
-    function handleUpdateArtist(event) {
-        setArtist(event.target.value);
-    }
-
-    function handleUpdateYear(event) {
-        setYear(event.target.value);
-    }
-
-    function handleUpdateYouTubeId(event) {
-        setYouTubeId(event.target.value);
-    }
+    const handleConfirm = () => {
+        onConfirm({
+            ...song,
+            title: title.trim(),
+            artist: artist.trim(),
+            year: parseInt(year) || song.year,
+            youTubeId: youTubeId.trim()
+        }, index);
+        onClose();
+    };
 
     return (
-        <Modal
-            open={store.currentModal === "EDIT_SONG"}
-        >
-        <Box sx={style1}>
-            <div id="edit-song-modal" data-animation="slideInOutLeft">
-            <Typography 
-                sx={{fontWeight: 'bold'}} 
-                id="edit-song-modal-title" variant="h4" component="h2">
-                Edit Song
-            </Typography>
-            <Divider sx={{borderBottomWidth: 5, p: '5px', transform: 'translate(-5.5%, 0%)', width:377}}/>
-            <Typography 
-                sx={{mt: "10px", color: "#702963", fontWeight:"bold", fontSize:"30px"}} 
-                id="modal-modal-title" variant="h6" component="h2">
-                Title: <input id="edit-song-modal-title-textfield" className='modal-textfield' type="text" defaultValue={title} onChange={handleUpdateTitle} />
-            </Typography>
-            <Typography 
-                sx={{color: "#702963", fontWeight:"bold", fontSize:"30px"}} 
-                id="modal-modal-artist" variant="h6" component="h2">
-                Artist: <input id="edit-song-modal-artist-textfield" className='modal-textfield' type="text" defaultValue={artist} onChange={handleUpdateArtist} />
-            </Typography>
-            <Typography 
-                sx={{color: "#702963", fontWeight:"bold", fontSize:"30px"}} 
-                id="modal-modal-year" variant="h6" component="h2">
-                Year: <input id="edit-song-modal-year-textfield" className='modal-textfield' type="text" defaultValue={year} onChange={handleUpdateYear} />
-            </Typography>
-            <Typography 
-                sx={{color: "#702963", fontWeight:"bold", fontSize:"25px"}} 
-                id="modal-modal-youTubeId" variant="h6" component="h2">
-                YouTubeId: <input id="edit-song-modal-youTubeId-textfield" className='modal-textfield' type="text" defaultValue={youTubeId} onChange={handleUpdateYouTubeId} />
-            </Typography>
-            <Button 
-                sx={{color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, p:"5px", mt:"20px"}} variant="outlined" 
-                id="edit-song-confirm-button" onClick={handleConfirmEditSong}>Confirm</Button>
-            <Button 
-                sx={{opacity: 0.80, color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, p:"5px", mt:"20px", ml:"197px"}} variant="outlined" 
-                id="edit-song-confirm-button" onClick={handleCancelEditSong}>Cancel</Button>
+        <div style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "50%",
+            maxWidth: "500px",
+            backgroundColor: "#B0FFB5",
+            border: "4px solid #0E8503",
+            borderRadius: "10px",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 1000,
+            boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
+        }}>
+            <div style={{
+                backgroundColor: "#0E8503",
+                color: "white",
+                padding: "10px 20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderTopLeftRadius: "6px",
+                borderTopRightRadius: "6px"
+            }}>
+                <h2 style={{ margin: 0 }}>Edit Song</h2>
             </div>
-        </Box>
-        </Modal>
+
+            <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                <input
+                    placeholder="Title"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    style={{ padding: "8px", backgroundColor: "#ccc", borderRadius: "6px", border: "none" }}
+                />
+                <input
+                    placeholder="Artist"
+                    value={artist}
+                    onChange={e => setArtist(e.target.value)}
+                    style={{ padding: "8px", backgroundColor: "#ccc", borderRadius: "6px", border: "none" }}
+                />
+                <input
+                    placeholder="Year"
+                    value={year}
+                    onChange={e => setYear(e.target.value)}
+                    style={{ padding: "8px", backgroundColor: "#ccc", borderRadius: "6px", border: "none" }}
+                />
+                <input
+                    placeholder="YouTube ID"
+                    value={youTubeId}
+                    onChange={e => setYouTubeId(e.target.value)}
+                    style={{ padding: "8px", backgroundColor: "#ccc", borderRadius: "6px", border: "none" }}
+                />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "20px" }}>
+                <button
+                    onClick={handleConfirm}
+                    style={{
+                        backgroundColor: "black",
+                        color: "white",
+                        padding: "12px 25px",
+                        borderRadius: "12px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                    }}
+                >
+                    Confirm
+                </button>
+                <button
+                    onClick={onClose}
+                    style={{
+                        backgroundColor: "black",
+                        color: "white",
+                        padding: "12px 25px",
+                        borderRadius: "12px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                    }}
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
     );
 }

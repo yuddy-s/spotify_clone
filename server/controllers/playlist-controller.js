@@ -199,32 +199,31 @@ getAllPlaylists = async (req, res) => {
         } = req.query;
 
         const sortOrder = order === "desc" ? -1 : 1;
-
-        // guest users see nothing without filters
         const hasFilters = playlistName || ownerName || songTitle || songArtist || songYear;
+
         if (!userId && !hasFilters) {
             return res.status(200).json({ playlists: [] });
         }
 
-        //  query by playlist name
-        let query = {};
-        if (playlistName) {
-            query.name = { $regex: playlistName, $options: "i" };
-        }
+        // Build query
+        const query = {};
+        if (playlistName) query.name = { $regex: playlistName, $options: "i" };
 
-        let playlists = await Playlist.find(query)
-            .populate("ownerId", "userName")
-            .populate("songs")
-            .exec();
+        // Fetch all matching playlists
+        let playlists = await db.findAll('Playlist', query);
 
-        // if logged in user with no filters  show only their playlists
+        // Populate ownerId and songs manually
+        playlists = await Promise.all(playlists.map(async p => {
+            const owner = await db.findById('User', p.ownerId);
+            const songs = await Promise.all((p.songs || []).map(sid => db.findById('Song', sid)));
+            return { ...p.toObject(), ownerId: owner, songs };
+        }));
+
+        // Filter by owner and songs
         if (userId && !hasFilters) {
-            playlists = playlists.filter(
-                p => p.ownerId._id.toString() === userId.toString()
-            );
+            playlists = playlists.filter(p => p.ownerId._id.toString() === userId.toString());
         }
 
-        // Filter by ownerName & song criteria
         playlists = playlists.filter(p => {
             const ownerMatch = ownerName
                 ? p.ownerId.userName.toLowerCase().includes(ownerName.toLowerCase())
@@ -242,19 +241,14 @@ getAllPlaylists = async (req, res) => {
             return ownerMatch && songMatch;
         });
 
+        // Sorting
         if (sortBy === "name") {
             playlists.sort((a, b) => a.name.localeCompare(b.name) * sortOrder);
-        }
-        else if (sortBy === "listens") {
+        } else if (sortBy === "listens") {
             playlists.sort((a, b) => (a.listens - b.listens) * sortOrder);
-        }
-        else if (sortBy === "owner") {
-            playlists.sort(
-                (a, b) =>
-                    a.ownerId.userName.localeCompare(b.ownerId.userName) * sortOrder
-            );
-        }
-        else {
+        } else if (sortBy === "owner") {
+            playlists.sort((a, b) => a.ownerId.userName.localeCompare(b.ownerId.userName) * sortOrder);
+        } else {
             playlists.sort((a, b) => b.createdAt - a.createdAt);
         }
 
@@ -262,13 +256,9 @@ getAllPlaylists = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({
-            playlists: [],
-            errorMessage: "Error fetching playlists"
-        });
+        return res.status(500).json({ playlists: [], errorMessage: "Error fetching playlists" });
     }
 };
-
 
 getPlaylistById = async (req, res) => {
     try {

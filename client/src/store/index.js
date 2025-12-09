@@ -58,7 +58,9 @@ function GlobalStoreContextProvider(props) {
         newListCounter: 0,
         listNameActive: false,
         listIdMarkedForDeletion: null,
-        listMarkedForDeletion: null
+        listMarkedForDeletion: null,
+        songs: [],
+        loadingSongs: false,
     });
     const history = useHistory();
 
@@ -321,6 +323,53 @@ function GlobalStoreContextProvider(props) {
         asyncLoadIdNamePairs();
     }
 
+    store.loadMyPlaylists = async () => {
+        try {
+            let apiBaseURL = "http://localhost:4000/api";
+            const response = await fetch(`${apiBaseURL}/playlist/`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            });
+            const data = await response.json();
+            const playlists = Array.isArray(data.playlists) ? data.playlists : [];
+
+            const myPlaylists = playlists.filter(p => p.ownerId?._id === auth?._id);
+            setStore(prev => ({ ...prev, userPlaylists: myPlaylists }));
+            return myPlaylists;
+        } catch (err) {
+            console.error("Error fetching playlists:", err);
+            setStore(prev => ({ ...prev, userPlaylists: [] }));
+            return [];
+        }
+    };
+    store.addSongToPlaylist = async (songId, playlistId) => {
+        const playlist = store.userPlaylists.find(p => p._id === playlistId);
+        if (!playlist) throw new Error("Playlist not found");
+
+        const updatedSongs = [...(playlist.songs || []).map(s => s._id), songId];
+        let apiBaseURL = "http://localhost:4000/api";
+        const response = await fetch(`${apiBaseURL}/playlist/${playlistId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ songs: updatedSongs }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+        if (response.status !== 200) throw new Error(data.errorMessage || "Failed to add song");
+
+        // update the store
+        setStore(prev => ({
+            ...prev,
+            userPlaylists: prev.userPlaylists.map(p =>
+                p._id === playlistId ? { ...p, songs: updatedSongs } : p
+            )
+        }));
+
+        return data;
+    };
+
     // FUNCTION TO INCREMENT LISTENERS FOR A PLAYLIST 
     store.incrementPlaylistPlays = async function (playlistId) {
         try {
@@ -457,12 +506,16 @@ function GlobalStoreContextProvider(props) {
     }
     // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
     // USING THE PROVIDED DATA AND PUTS THIS SONG AT INDEX
-    store.createSong = function(index, song) {
-        let list = store.currentList;      
-        list.songs.splice(index, 0, song);
-        // NOW MAKE IT OFFICIAL
-        store.updateCurrentList();
-    }
+    store.createSong = async () => {
+        const response = await storeRequestSender.createSong();
+        if (response.status === 200 && response.data.song) {
+             await store.loadSongs(); 
+            return response.data.song;
+        } else {
+            console.error("Failed to create song", response.data);
+            return null;
+        }
+    };
     // THIS FUNCTION MOVES A SONG IN THE CURRENT LIST FROM
     // start TO end AND ADJUSTS ALL OTHER ITEMS ACCORDINGLY
     store.moveSong = function(start, end) {
@@ -516,11 +569,111 @@ function GlobalStoreContextProvider(props) {
 
     // NEW FUNCTIONS ADDED FOR GLOBAL SONGS / SONGS CATALOG FOR FINAL PROJECT YO
     store.loadAllSongs = async () => {
-        const response = await storeRequestSender.getAllSongs();
-        if (response.status === 200 && response.data.success) {
-            setStore(prev => ({ ...prev, songs: response.data.data }))
+        try {
+            const response = await storeRequestSender.getAllSongs();
+            const allSongs = Array.isArray(response.data?.songs) ? response.data.songs : [];
+            setStore(prev => ({ ...prev, songs: allSongs }));
+            return allSongs; // important: return the array
+        } catch (err) {
+            console.error("Error loading all songs:", err);
+            setStore(prev => ({ ...prev, songs: [] }));
+            return [];
         }
-    }
+    };
+
+    store.loadSongs = async (searchParams = {}) => {
+        setStore(prev => ({ ...prev, loadingSongs: true }));
+
+        try {
+            const allSongs = await store.loadAllSongs(); // returns array now
+
+            // fallback if auth not ready
+            if (!Array.isArray(allSongs) || !auth) {
+                setStore(prev => ({ ...prev, songs: [], loadingSongs: false }));
+                return [];
+            }
+
+            let filteredSongs = allSongs;
+
+            if (Object.keys(searchParams).length === 0) {
+                // no search → only my songs
+                filteredSongs = allSongs.filter(song => song.ownerId?._id === auth._id);
+            } else {
+                filteredSongs = allSongs.filter(song => {
+                    const matchesTitle = searchParams.title ? song.title?.toLowerCase().includes(searchParams.title.toLowerCase()) : true;
+                    const matchesArtist = searchParams.artist ? song.artist?.toLowerCase().includes(searchParams.artist.toLowerCase()) : true;
+                    const matchesYear = searchParams.year ? song.year?.toString().includes(searchParams.year) : true;
+                    return matchesTitle && matchesArtist && matchesYear;
+                });
+            }
+
+            // Optional sort
+            if (searchParams.sortBy && searchParams.order) {
+                const { sortBy, order } = searchParams;
+                filteredSongs.sort((a, b) => {
+                    let valA = a[sortBy];
+                    let valB = b[sortBy];
+                    if (typeof valA === 'string') valA = valA.toLowerCase();
+                    if (typeof valB === 'string') valB = valB.toLowerCase();
+                    if (valA < valB) return order === 'asc' ? -1 : 1;
+                    if (valA > valB) return order === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            setStore(prev => ({ ...prev, songs: filteredSongs, loadingSongs: false }));
+            return filteredSongs;
+        } catch (err) {
+            console.error("Error loading songs:", err);
+            setStore(prev => ({ ...prev, songs: [], loadingSongs: false }));
+            return [];
+        }
+    };
+
+store.loadMySongs = async () => {
+    const allSongs = await store.loadAllSongs(); // always returns array
+    if (!auth || !Array.isArray(allSongs)) return [];
+    return allSongs.filter(song => song.ownerId?._id === auth._id);
+};
+
+    store.deleteSong = async (songId, index) => {
+        try {
+            const response = await storeRequestSender.deleteSongById(songId);
+
+            if (response.status === 200) {
+                setStore(prev => {
+                    const newSongs = [...prev.songs];
+                    newSongs.splice(index, 1);
+                    return { ...prev, songs: newSongs };
+                });
+                console.log(`Deleted song with id: ${songId}`);
+            } else {
+                console.error("Failed to delete song:", response.data.errorMessage || response.data);
+            }
+        } catch (err) {
+            console.error("Error deleting song:", err);
+        }
+    };
+
+    store.editSong = async (updatedSong, index) => {
+        if (!updatedSong?._id) return;
+
+        try {
+            const response = await storeRequestSender.updateSongById(updatedSong._id, updatedSong);
+
+            if (response.status === 200 && response.data.success) {
+                 setStore(prev => {
+                    const newSongs = [...prev.songs];
+                    newSongs[index] = response.data.song;
+                    return { ...prev, songs: newSongs };
+                });
+            } else {
+                console.error("Failed to update song:", response.data.errorMessage);
+            }
+        } catch (err) {
+            console.error("editSong error:", err);
+        }
+    };
 
     store.createGlobalSong = async (title, artist, year, youTubeId) => {
         return await storeRequestSender.createSong(title, artist, year, youTubeId)
