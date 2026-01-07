@@ -1,3 +1,6 @@
+
+<img width="1881" height="899" alt="Screenshot 2026-01-06 195214" src="https://github.com/user-attachments/assets/6ca668d9-843f-4790-80d5-4855728b734e" />
+
 ## Overview
 # Spotify Clone
 
