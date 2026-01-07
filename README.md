@@ -1,4 +1,22 @@
 ## Overview
-This repository is to be used for Stony Brook University's CSE 316, Fall 2025 Semester, Homework 4. This assignment is similar to HWs 1 - 3 in that we are creating a similar application, but this time we're adding some unit testing, changing the database, and doing a bit of abstraction/redesign regarding how our back-end talks to the database.
+# Spotify Clone
 
-All assignment instructions are provided <a href='https://www.cs.stonybrook.edu/~cse316/HW4.html'>here</a>.
+A Spotify-like web app where users can browse and play songs, built with a full-stack setup using MongoDB, React, Node.js, and Express.js. All API requests are made using raw `fetch`.
+
+## Features
+- Browse and play songs
+- Add new songs to the database
+- Full React frontend with Node.js/Express backend
+
+## Tech Stack
+- Frontend: React
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- API Requests: Raw `fetch`
+
+## Installation & Running
+1. Clone the repo: `git clone <repo-url>`
+2. Install dependencies: `cd backend && npm install && cd ../frontend && npm install`
+3. Add your `.env` variables (e.g., MongoDB URI)
+4. Start backend: `cd backend && npm start`
+5. Start frontend: `cd frontend && npm start`
